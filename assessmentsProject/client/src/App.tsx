@@ -1,35 +1,35 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// src/features/users/UsersList.tsx
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { AppDispatch, RootState } from './app/store';
+import { fetchUsers } from './features/users/usersSlice';
 
-function App() {
-  const [count, setCount] = useState(0)
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+const UsersList = () => {
+    const dispatch: AppDispatch = useDispatch();
+    const users = useSelector((state: RootState) => state.users.users);
+    const status = useSelector((state: RootState) => state.users.status);
+    const error = useSelector((state: RootState) => state.users.error);
 
-export default App
+    useEffect(() => {
+        if (status === 'idle') {
+            dispatch(fetchUsers());
+        }
+    }, [status, dispatch]);
+
+    if (status === 'loading') return <p>Loading...</p>;
+    if (status === 'failed') return <p>Error: {error}</p>;
+
+    return (
+        <div>
+            <h2>Users List</h2>
+            <ul>
+                {users.map(user => (
+                    <li key={user._id}>{user.username}</li>
+                ))}
+            </ul>
+        </div>
+    );
+};
+
+export default UsersList;
